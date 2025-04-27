@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template para crear un Listener de ALB con reglas de ejemplo
+
+Parameters:
+  LoadBalancerArn:
+    Type: String
+    Description: ARN del Application Load Balancer existente
+  TargetGroupArn1:
+    Type: String
+    Description: ARN del primer Target Group (ej: para usuarios)
+  TargetGroupArn2:
+    Type: String
+    Description: ARN del segundo Target Group (ej: para posts)
+
+Resources:
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancerArn
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupArn1
+
+  ALBListenerRuleUsers:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - /users/*
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupArn1
+
+  ALBListenerRulePosts:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 2
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - /posts/*
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupArn2
+
+Outputs:
+  ListenerArn:
+    Description: ARN del Listener
+    Value: !Ref ALBListener
