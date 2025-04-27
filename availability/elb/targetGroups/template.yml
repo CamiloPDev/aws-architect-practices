@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template para crear uno o más Target Groups para un ALB
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: ID de la VPC donde se crearán los Target Groups
+  TargetGroupName:
+    Type: String
+    Description: Nombre del Target Group
+  Protocol:
+    Type: String
+    AllowedValues: [HTTP, HTTPS]
+    Default: HTTP
+    Description: Protocolo para el Target Group (HTTP o HTTPS)
+  Port:
+    Type: Number
+    Default: 80
+    Description: Puerto para recibir tráfico
+  HealthCheckPath:
+    Type: String
+    Default: /
+    Description: Ruta para la comprobación de estado (Health Check)
+  HealthCheckProtocol:
+    Type: String
+    AllowedValues: [HTTP, HTTPS]
+    Default: HTTP
+    Description: Protocolo para la comprobación de estado
+  MatcherHttpCode:
+    Type: String
+    Default: 200
+    Description: Código(s) HTTP esperado(s) para el Health Check (puedes poner 200 o una lista separada por comas como 200,302)
+
+Resources:
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Ref TargetGroupName
+      VpcId: !Ref VpcId
+      Protocol: !Ref Protocol
+      Port: !Ref Port
+      TargetType: instance
+      HealthCheckEnabled: true
+      HealthCheckPath: !Ref HealthCheckPath
+      HealthCheckProtocol: !Ref HealthCheckProtocol
+      Matcher:
+        HttpCode: !Ref MatcherHttpCode
+
+Outputs:
+  TargetGroupArn:
+    Description: ARN del Target Group
+    Value: !Ref ALBTargetGroup

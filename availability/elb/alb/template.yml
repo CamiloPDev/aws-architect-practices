@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template para crear un Application Load Balancer (ALB)
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: ID de la VPC existente
+  Subnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: ID de la primera subnet pública
+  Subnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: ID de la segunda subnet pública
+  ALBSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: ID del Security Group para el ALB
+
+Resources:
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: alb-practices
+      Type: application
+      IpAddressType: ipv4
+      Scheme: internet-facing
+      Subnets:
+        - !Ref Subnet1
+        - !Ref Subnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroupId
+
+Outputs:
+  ALBArn:
+    Description: ARN del ALB
+    Value: !Ref ApplicationLoadBalancer
+  ALBDNSName:
+    Description: Nombre DNS del ALB
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
